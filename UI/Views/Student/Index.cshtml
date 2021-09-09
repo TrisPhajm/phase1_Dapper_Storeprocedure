@@ -1,0 +1,98 @@
+﻿@{
+    ViewData["Title"] = "Student List";
+}
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<h1 class="display-4">@ViewData["Title"]</h1>
+<h3> Manage Student </h3>
+<div class=" form-group">
+    <label for="Id">Id: (0 to add)</label>
+    <input id="StudentId" class="form-control" name="Id" value="0" type="number"/>
+</div>
+<div class=" form-group">
+    <label for="Name">Name:</label>
+    <input id="StudentName" class="form-control" name="Name" type="text"/>
+</div>
+<div class=" form-group">
+    <label for="Class">Class:</label>
+    <input id="StudentClass" class="form-control" name="Class" type="text"/>
+</div>
+<div class="text-center">
+    <button id="create" class="btn btn-sm btn-primary" onclick="SaveStudent();"> Save </button>
+</div>
+
+<button onclick="GetStudentList();" class="btn btn-primary"> Load</button>
+<br>
+
+<h2> Student List</h2>
+<table id="StudentTable" class="table table-sm table-striped table-bordered m-2">
+    <thead>
+        <tr>
+            <th> Student ID </th>
+            <th> Student Name </th>
+            <th> Student Class </th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<script>
+    $(document).ready(function () {
+        GetStudentList();
+    });
+
+    function GetStudentList() {
+        $.getJSON("Student/GetAllStudents", function (response) {
+            console.log(response);
+            $("#StudentTable tbody tr").remove();
+            $.map(response, function (item) {
+                $("#StudentTable tbody").append(
+                    "<tr>" +
+                    "<td>" + item.id + "</td>" +
+                    "<td> <a href='Student/Detail?studentId=" + item.id + "'>" + item.name + "</a></td>" +
+                    "<td>" + item.class + "</td>" +
+                    "<td>" +
+                    "<button class='btn-success' onclick='Edit(" + item.id + ");' style='margin-right:5px;'> Edit </button>" +
+                    "<button class='btn-danger' onclick='Delete(" + item.id + ");'> Delete </button>" +
+                    "</td>" +
+                    "</tr>"
+                );
+            })
+        });
+    }
+    function Delete(id) {
+        if (id > 0) {
+            $.ajax({
+                url: "Student/DeleteStudent",
+                type: "DELETE",
+                data: { "studentId": id },
+                success: function (success) {
+                    GetStudentList();
+                },
+                error: function (ex) {
+                    console.log(ex.responseText);
+                }
+            });
+        }
+    }
+    function Edit(id) {
+        if (id > 0) {
+            $.getJSON("Student/GetStudentById?studentId=" + id,
+                function (response) {
+                    $("#StudentId").val(response.id);
+                    $("#StudentName").val(response.name);
+                    $("#StudentClass").val(response.class);
+                });
+        }
+    }
+    function SaveStudent() {
+        var student = {
+            Id: $("#StudentId").val(),
+            Name: $("#StudentName").val(),
+            Class: $("#StudentClass").val()
+        };
+        $.post("Student/AddOrUpdate", student)
+            .always(function () {
+                GetStudentList();
+            });
+    }
+</script>
