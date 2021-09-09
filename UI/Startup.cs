@@ -27,7 +27,7 @@ namespace UI
         {
             services.AddControllersWithViews();
             services.AddHttpClient("api_server", c=> {
-                c.BaseAddress = new Uri("http://localhost:52608");
+                c.BaseAddress = new Uri("https://localhost:44334/");
             })
             .ConfigurePrimaryHttpMessageHandler(() =>
             {
